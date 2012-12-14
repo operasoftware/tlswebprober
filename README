@@ -1,0 +1,54 @@
+#   Copyright 2010-2012 Opera Software ASA 
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+**** Checkout and start instructions ****
+
+  git clone --recursive gitserver:/git/tlswebprober.git
+
+To run in local mode, use 
+
+  cd tlswebprober/webprober
+  python manage.py runserver
+  
+and open up http://localhost:8000/ in your browser
+
+For deployment on server, see below.
+
+**** About the tlswebprober ****
+
+The tlswebprober is a web service version of the TLS Prober, allowing
+testing of individual TLS servers, supporting HTTPS, IMAP, POP, or SMTP,
+with a presentation of the results afterwards.
+
+The tool is based on the Django framework (only tested in Django 1.1), 
+and is deployed on a HTTP server using the standard Django deployment 
+procedures described at 
+
+  <https://docs.djangoproject.com/en/1.1/howto/deployment/>
+  
+using tlswebprober.webprober.settings as the settings module.
+
+In the deployed path, the following URLs are defined
+
+  /     	:	Main query page. The "Server" field will accept, and parse a full URL
+  				The form submits to /doprobe
+  /doprobe	:	Performs a probe of the designated server , and displays the results
+  				Accepts POST or GET queries 
+
+  				
+Requirements:
+
+ - Python 2.6 or later
+ - Django 1.1 or later
+ - M2Crypto

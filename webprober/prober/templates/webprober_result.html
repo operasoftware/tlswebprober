@@ -1,0 +1,114 @@
+{% comment %}
+#   Copyright 2010-2012 Opera Software ASA 
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+{% endcomment %}
+
+{% extends "base.html" %}
+{% load tags	 %}
+
+{% block title %}Web TLS Prober: Probe results 
+	{{ hostname|escape }}:{{port}}
+	{% endblock %}
+
+{% block title_doc %}Web TLS Prober: probe result {{ hostname|escape }}:{{port}}:{{protocol|escape}}.{% endblock %}
+
+{% block content %}
+	<p> Server: {{hostname|escape}}:{{port}}:{{protocol|escape}} (<a href="doprobe?server={{hostname|escape}}&port={{port}}&protocol={{protocol|escape}}">direct testlink</a>)</p>
+	<p> Software version: {{server_agent|escape}}</p>
+	
+	<h2>Summary</h2>
+	{% if warn_details or trouble_details %}
+	{% for item in trouble_details %}
+	{%if forloop.first %}
+	<p>Serious:</p>
+	{%endif%}
+	<p style="color:red;">{{item}}</p>
+	{%endfor%}
+	{% for item in warn_details %}
+	{%if forloop.first %}
+	<p>Warnings:</p>
+	{%endif%}
+	<p style="color:orange;">{{item}}</p>
+	{%endfor%}
+	{%else%}
+	<p>No problems detected</p>
+	{%endif%}
+
+	<h2>Details</h2>
+	<p>Supported SSL/TLS versions</p>
+	<table>
+		{%if support_20 %}
+		<tr><td>SSL v2.0</td><td><span style="color:black; background-color:red;">Yes</span></td>
+		{%endif%}
+		<tr><td>SSL v3.0</td><td>{% color_value support_30 %}</td>
+		<tr><td>TLS 1.0</td><td>{% color_value support_31 %}</td>
+		<tr><td>TLS 1.1</td><td>{% color_value support_32 %}</td>
+		<tr><td>TLS 1.2</td><td>{% color_value support_33 %}</td>
+	</table>
+	<p></p>
+	<p>Responds only with supported TLS versions: {% color_value correct_version_response %}</p>
+	<p></p>
+	<p>Uses Client Hello version field for negotiation: {% color_value correct_version_field %}</p>
+	<p>Client Hello version field can be higher than record protocol for negotiation: {% color_value record_not_match_hello_ver %}</p>
+	<p></p>
+	<p>Renego Information Extension Supported: {% color_value support_renego %}
+	{%if unstable_renego %}
+	<span style="color:red"> (UNSTABLE PATCH)</span>
+	{%endif%}
+	   </p>
+	<p></p>
+	<p>Support Certificate Status Extension:  {% color_value support_certstatus %}</p>
+	{%if dhe_keysize %}
+		<p>Temporary key size: <span 
+		{%if dhe_keysize_low %}
+			style="color:black; background-color:red;"
+		{%endif%}
+		>{{dhe_keysize}}</span></td>
+	{%endif%}
+	<p>Support only strong tested ciphers:  {% color_value only_strong_ciphers %}</p>
+
+	<p>Tolerance details:</p>
+	<table>
+		<tr>
+			<th>Version</th>
+			<th>Version Tolerance</<th>
+			<th>Extension Tolerance</<th>
+			<th>Version checking</<th>
+			<th>Bad version requirement</<th>
+		</tr>
+
+	{% for entry in version_status %}
+		<tr>
+			<td>{{entry.version_name}} ({{entry.version.0}}.{{entry.version.1}}) </td>
+			<td>{% color_value entry.version_intolerant %}</td>
+			<td>{% color_value entry.extension_intolerant %}</td>
+			<td>{% color_value entry.no_version_check %}</td>
+			<td>{% color_value entry.require_bad_version_check %}</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<p/>
+	<p>Support for SSL/TLS cipher suites tested:</p>
+	<table>
+	{% for cipher, ciphersupported in supported_ciphers.items|dictsort:"0" %}
+		<tr>
+			<td>{{cipher}} </td>
+			<td>{% color_value ciphersupported %}</td>
+		</tr>
+	{% endfor %}
+</table>
+
+<pre>{{debug}}</pre>
+	
+{% endblock %}
